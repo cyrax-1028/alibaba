@@ -29,7 +29,6 @@ class Product(BaseModel):
     description = models.TextField(null=True, blank=True)
     price = models.DecimalField(max_digits=14, decimal_places=2)
     discount = models.PositiveIntegerField(default=0)
-    image = models.ImageField(upload_to='media/products/')
     quantity = models.PositiveIntegerField(default=1, null=True, blank=True)
     rating = models.DecimalField(max_digits=2, decimal_places=1, default=1.0)
     stock = models.BooleanField(default=False)
@@ -39,14 +38,14 @@ class Product(BaseModel):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='products', null=True, blank=True)
 
     @property
-    def get_absolute_url(self):
-        return self.image.url
-
-    @property
     def discounted_price(self):
         if self.discount > 0:
-            self.price = Decimal(self.price) * Decimal((1 - self.discount / 100))
-        return Decimal(self.price).quantize(Decimal('0.001'))
+            return (self.price * (Decimal(1) - Decimal(self.discount) / 100)).quantize(Decimal('0.01'))
+        return self.price
+
+    def save(self, *args, **kwargs):
+        self.stock = self.quantity > 0
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -54,6 +53,23 @@ class Product(BaseModel):
     class Meta:
         verbose_name = 'product'
         verbose_name_plural = 'products'
+
+class Image(BaseModel):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='media/products/')
+    is_primary = models.BooleanField(default=False)
+    order = models.PositiveIntegerField(default=0)
+
+    @property
+    def get_absolute_url(self):
+        if self.is_primary:
+            return self.image.url
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"Image of {self.product.name}"
 
 
 class Order(BaseModel):
@@ -65,8 +81,9 @@ class Order(BaseModel):
     @property
     def subtotal_price(self):
         order_items = self.orderitem_set.all()
-        subtotal = sum(item.product.price * item.quantity for item in order_items if item.product)
-        return Decimal(subtotal).quantize(Decimal('0.001'))
+        subtotal = sum(
+            (item.product.price * item.quantity) for item in order_items if item.product and item.product.price)
+        return Decimal(subtotal).quantize(Decimal('0.01'))
 
     @property
     def tax_price(self):

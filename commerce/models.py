@@ -72,36 +72,56 @@ class Image(BaseModel):
         return f"Image of {self.product.name}"
 
 
+class Customer(BaseModel):
+    id = models.CharField(max_length=50, primary_key=True)
+    email = models.EmailField()  # Email
+    description = models.TextField(blank=True, null=True, default="No Description")
+    vat_number = models.CharField(max_length=50, blank=True, null=True, default="No VAT number")
+
+    send_email_to = models.EmailField()
+    address = models.TextField()
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    invoice_prefix = models.CharField(max_length=20, blank=True, null=True)
+
+    def __str__(self):
+        return self.email
+
+
+
 class Order(BaseModel):
-    name = models.CharField(max_length=255)
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled'),
+    ]
+
+    order_id = models.CharField(max_length=20, unique=True)
+    date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    billing_address = models.TextField(default="No Billing Address")
+    shipping_address = models.TextField(default="No Shipping Address")
     email = models.EmailField()
-    phone = models.CharField(max_length=255)
-    address = models.CharField(max_length=255)
+    phone = models.CharField(max_length=20)
+    payment_method = models.CharField(max_length=50)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    @property
-    def subtotal_price(self):
-        order_items = self.orderitem_set.all()
-        subtotal = sum(
-            (item.product.price * item.quantity) for item in order_items if item.product and item.product.price)
-        return Decimal(subtotal).quantize(Decimal('0.01'))
-
-    @property
-    def tax_price(self):
-        tax = (self.subtotal_price / 100) * 5
-        return Decimal(tax).quantize(Decimal('0.001'))
-
-    @property
-    def total_price(self):
-        return self.subtotal_price + self.tax_price
+    def calculate_totals(self):
+        self.subtotal = sum(
+            item.quantity * item.product.discounted_price for item in self.order_items.all()
+        )
+        self.tax = (self.subtotal * Decimal(0.05)).quantize(Decimal('0.01'))
+        self.total = self.subtotal + self.tax
+        self.save()
 
     def __str__(self):
-        return self.name
+        return f"Order #{self.order_id}"
 
-
-class OrderItem(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True)
-    quantity = models.PositiveIntegerField(default=1, null=True, blank=True)
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f'{self.product.name} => {self.order}'
+        return f"{self.quantity} x {self.product.name}"

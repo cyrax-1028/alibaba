@@ -20,3 +20,9 @@ def order_list(request):
 
 def order_details(request, order_id):
     return render(request, template_name='commerce/order-details.html')
+
+def customer_list(request):
+    return render(request, template_name='commerce/customers.html')
+
+def customer_details(request, customer_id):
+    return render(request, template_name='commerce/customer-details.html')

@@ -6,6 +6,12 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="row">
+                <div class="col-12 mb-3 text-end">
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-falcon-default btn-sm">
+                        <span class="fas fa-edit" data-fa-transform="shrink-3 down-2"></span>
+                        <span class="d-none d-sm-inline-block ms-1">Edit</span>
+                    </a>
+                </div>
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="product-slider" id="galleryTop">
                         <div class="swiper-container theme-slider position-lg-absolute all-0"
@@ -13,8 +19,8 @@
                             <div class="swiper-wrapper h-100">
                                 {% for i in product.images.all %}
                                     <div class="swiper-slide">
-                                        <img class="rounded-1" src="{{ i.image.get_absolute_url }}" width="200"
-                                             height="200" alt=""/>
+                                        <img class="rounded-1" src="{{ i.image.url }}" width="200" height="200"
+                                             alt="Product Image"/>
                                     </div>
                                 {% endfor %}
                             </div>

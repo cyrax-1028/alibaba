@@ -63,10 +63,6 @@ class Product(BaseModel):
         self.stock = "Available" if self.quantity > 0 else "Sold Out"
         super().save(*args, **kwargs)
 
-    # @property
-    # def get_absolute_url(self):
-    #     return self.image.url
-
     def __str__(self):
         return self.name
 
@@ -74,22 +70,14 @@ class Product(BaseModel):
         verbose_name = 'product'
         verbose_name_plural = 'products'
 
-class Img(BaseModel):
+class ProductImage(models.Model):
+    product = models.ForeignKey("Product", on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to='media/products/')
 
-    @property
-    def get_absolute_url(self):
-        return self.image.url
-
     def __str__(self):
-        return f"Image of {self.image.name}"
+        return f"{self.product.name} - Image {self.id}"
 
-class ProductImg(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL, related_name='images', null=True, blank=True)
-    image = models.ForeignKey(Img, on_delete=models.SET_NULL, null=True, blank=True)
 
-    def __str__(self):
-        return f"Image of {self.product.name}"
 
 class Attribute(models.Model):
     name = models.CharField(max_length=255)

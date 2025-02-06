@@ -6,16 +6,12 @@ from django.utils.html import format_html
 from adminsortable2.admin import SortableAdminMixin
 from import_export import resources
 
-# Register your models here.
 
-# admin.site.register(Comment)
-# admin.site.register(Customer)
-# admin.site.register(ProductAttribute)
 admin.site.register(Favourite)
-# admin.site.register(Attribute)
-# admin.site.register(AttributeValue)
-admin.site.register(Img)
-admin.site.register(ProductImg)
+
+@admin.register(ProductImage)
+class ProductImageAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ('image', 'product')
 
 @admin.register(Comment)
 class CommentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -38,14 +34,21 @@ class ProductAttributeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ('product__name', 'attribute__name', 'attribute_value__value')
     list_filter = ('attribute',)
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
 
+class ProductAttributeInline(admin.TabularInline):
+    model = ProductAttribute
+    extra = 1
+
+@admin.register(Product)
 class ProductAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock')
     search_fields = ('name', 'price')
     list_filter = ['category', 'quantity', 'rating']
     autocomplete_fields = ['category']
-
-admin.site.register(Product, ProductAdmin)
+    inlines = [ProductImageInline, ProductAttributeInline]
 
 class ProductInline(admin.TabularInline):
     model = Product

@@ -22,17 +22,24 @@
                                         <option value="?filter=rating">Rating</option>
                                     </select>
                                 </div>
-
                             </form>
                         </div>
-                        <div class="col-auto pe-0"><a class="text-600 px-1"
-                                                      href="#"
-                                                      data-bs-toggle="tooltip" title="Product Grid"><span
-                                class="fas fa-th"></span></a></div>
+                        <div class="col-auto pe-0">
+                            <a class="text-600 px-1" href="#" data-bs-toggle="tooltip" title="Product Grid">
+                                <span class="fas fa-th"></span>
+                            </a>
+                        </div>
                     </div>
+                </div>
+                <div class="col-sm-auto">
+                    <a href="{% url 'add_product' %}" class="btn btn-falcon-default btn-sm">
+                        <span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span>
+                        <span class="d-none d-sm-inline-block ms-1">New</span>
+                    </a>
                 </div>
             </div>
         </div>
+
     </div>
     <div class="card">
         <div class="card-body p-0 overflow-hidden">
@@ -48,7 +55,7 @@
                                             {% for i in product.images.all %}
                                                 <div class="swiper-slide h-100"><img
                                                         class="rounded-1 fit-cover h-100 w-100"
-                                                        src="{{ i.image.get_absolute_url }}" alt=""/></div>
+                                                        src="{{ i.image.url }}" alt=""/></div>
                                             {% endfor %}
                                         </div>
                                         <div class="swiper-nav">
@@ -117,10 +124,6 @@
                                                 <span class="ms-2 d-none d-md-inline-block">Favourite</span>
                                             {% endif %}
                                         </a>
-                                            <a
-                                                    class="btn btn-sm btn-primary d-lg-block mt-lg-2"
-                                                    href="#!"><span class="fas fa-cart-plus"> </span><span
-                                                    class="ms-2 d-none d-md-inline-block">Add to Cart</span></a>
                                         </div>
                                     </div>
                                 </div>

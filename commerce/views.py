@@ -9,7 +9,16 @@ from commerce.forms import *
 def product_list(request):
     search_query = request.GET.get('q', '')
     filter_type = request.GET.get('filter', '')
-    products = Product.objects.all()
+
+    if filter_type == 'date':
+        products = Product.objects.all().order_by('-created_at')
+    elif filter_type == 'price':
+        products = Product.objects.all().order_by('-price')
+    elif filter_type == 'rating':
+        products = Product.objects.all().order_by('-rating')
+
+    else:
+        products = Product.objects.all()
 
     if search_query:
         products = Product.objects.filter(name__icontains=search_query)
@@ -32,6 +41,7 @@ def product_details(request, product_id):
     return render(request, 'commerce/product-details.html', context)
 
 def customer_list(request):
+    search_query = request.GET.get('q', '')
     filter_type = request.GET.get('filter', '')
 
     if filter_type == 'filter':
@@ -41,6 +51,9 @@ def customer_list(request):
 
     for customer in customers:
         customer.created_date = customer.created_at.strftime("%B %d, %Y")
+
+    if search_query:
+        customers = Customer.objects.filter(full_name__icontains=search_query)
 
     context = {
         'customers': customers,

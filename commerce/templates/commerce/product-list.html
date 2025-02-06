@@ -14,12 +14,15 @@
                             <form class="row gx-2">
                                 <div class="col-auto"><small>Sort by: </small></div>
                                 <div class="col-auto">
-                                    <select class="form-select form-select-sm" aria-label="Bulk actions">
-                                        <option selected="">Best Match</option>
-                                        <option value="Refund">Newest</option>
-                                        <option value="Delete">Price</option>
+                                    <select class="form-select form-select-sm" aria-label="Bulk actions"
+                                            onchange="location.href=this.value;">
+                                        <option selected disabled>Best Match</option>
+                                        <option value="?filter=date">Date</option>
+                                        <option value="?filter=price">Price</option>
+                                        <option value="?filter=rating">Rating</option>
                                     </select>
                                 </div>
+
                             </form>
                         </div>
                         <div class="col-auto pe-0"><a class="text-600 px-1"

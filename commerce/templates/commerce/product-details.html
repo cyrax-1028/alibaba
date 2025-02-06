@@ -12,8 +12,9 @@
                              data-swiper='{"autoHeight":true,"spaceBetween":5,"loop":true,"loopedSlides":5,"thumb":{"spaceBetween":5,"slidesPerView":5,"loop":true,"freeMode":true,"grabCursor":true,"loopedSlides":5,"centeredSlides":true,"slideToClickedSlide":true,"watchSlidesVisibility":true,"watchSlidesProgress":true,"parent":"#galleryTop"},"slideToClickedSlide":true}'>
                             <div class="swiper-wrapper h-100">
                                 {% for i in product.images.all %}
-                                    <div class="swiper-slide h-100"><img class="rounded-1 fit-cover h-100 w-100"
-                                                                         src="{{ i.image.get_absolute_url }}" alt=""/>
+                                    <div class="swiper-slide">
+                                        <img class="rounded-1" src="{{ i.image.get_absolute_url }}" width="200"
+                                             height="200" alt=""/>
                                     </div>
                                 {% endfor %}
                             </div>
@@ -139,11 +140,6 @@
                                     {% for comment in comments %}
                                         <div class="col-lg-6 mb-4 mb-lg-0">
                                             <div class="mb-1">{% for i in "12345"|make_list %}
-                                                {% if forloop.counter <= comment.rating %}
-                                                    <span class="fa fa-star text-warning"></span>
-                                                {% else %}
-                                                    <span class="fa fa-star text-300"></span>
-                                                {% endif %}
                                             {% endfor %}<span
                                                     class="ms-3 text-dark fw-semi-bold">{{ comment.name }} • {{ formatted_date }}</span>
                                             </div>

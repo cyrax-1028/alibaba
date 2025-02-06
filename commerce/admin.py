@@ -8,20 +8,40 @@ from import_export import resources
 
 # Register your models here.
 
-admin.site.register(Customer)
-# admin.site.register(Order)
-# admin.site.register(Order)
-# admin.site.register(OrderItem)
-# admin.site.register(Image)
+# admin.site.register(Comment)
+# admin.site.register(Customer)
+# admin.site.register(ProductAttribute)
+admin.site.register(Favourite)
+# admin.site.register(Attribute)
+# admin.site.register(AttributeValue)
+admin.site.register(Img)
+admin.site.register(ProductImg)
 
-class ImageInline(admin.TabularInline):
-    model = Image
-    extra = 3
+@admin.register(Comment)
+class CommentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('name', 'email', 'content', 'product', 'is_negative', 'created_at')
+    search_fields = ('name', 'email', 'content', 'product__name')
+
+@admin.register(Attribute)
+class AttributeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+@admin.register(AttributeValue)
+class AttributeValueAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('value',)
+    search_fields = ('value',)
+
+@admin.register(ProductAttribute)
+class ProductAttributeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('product', 'attribute', 'attribute_value')
+    search_fields = ('product__name', 'attribute__name', 'attribute_value__value')
+    list_filter = ('attribute',)
+
 
 class ProductAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'stock')
     search_fields = ('name', 'price')
-    inlines = [ImageInline]
     list_filter = ['category', 'quantity', 'rating']
     autocomplete_fields = ['category']
 
@@ -42,6 +62,21 @@ class CategoryAdmin(admin.ModelAdmin):
     def product_count(self, category):
         return category.products.count()
 
+
+class CustomerResource(resources.ModelResource):
+    class Meta:
+        model = Customer
+        fields = ('id', 'full_name', 'seria', 'email', 'description', 'vat_number', 'send_email_to', 'address', 'phone_number', 'invoice_prefix', 'invoice_number')
+
+class CustomerAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('full_name', 'invoice_id', 'email')
+    fields = ('full_name', 'email', 'description', 'vat_number', 'send_email_to', 'address', 'phone_number', 'invoice_number')
+
+    def invoice_id(self, obj):
+        return obj.generate_invoice_id()
+    invoice_id.short_description = 'Invoice ID'
+
+admin.site.register(Customer, CustomerAdmin)
 
 admin.site.site_header = 'Alibaba Admin'
 admin.site.site_title = 'Alibaba Admin Portal'

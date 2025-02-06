@@ -117,7 +117,7 @@ var Prism = (function (_self) {
 			 * @param {T} o
 			 * @param {Record<number, any>} [visited]
 			 * @returns {T}
-			 * @template T
+			 * @templates T
 			 */
 			clone: function deepClone(o, visited) {
 				visited = visited || {};
@@ -1028,12 +1028,12 @@ var Prism = (function (_self) {
 	 * @property {T} value
 	 * @property {LinkedListNode<T> | null} prev The previous node.
 	 * @property {LinkedListNode<T> | null} next The next node.
-	 * @template T
+	 * @templates T
 	 * @private
 	 */
 
 	/**
-	 * @template T
+	 * @templates T
 	 * @private
 	 */
 	function LinkedList() {
@@ -1057,7 +1057,7 @@ var Prism = (function (_self) {
 	 * @param {LinkedListNode<T>} node
 	 * @param {T} value
 	 * @returns {LinkedListNode<T>} The added node.
-	 * @template T
+	 * @templates T
 	 */
 	function addAfter(list, node, value) {
 		// assumes that node != list.tail && values.length >= 0
@@ -1076,7 +1076,7 @@ var Prism = (function (_self) {
 	 * @param {LinkedList<T>} list
 	 * @param {LinkedListNode<T>} node
 	 * @param {number} count
-	 * @template T
+	 * @templates T
 	 */
 	function removeRange(list, node, count) {
 		var next = node.next;
@@ -1090,7 +1090,7 @@ var Prism = (function (_self) {
 	/**
 	 * @param {LinkedList<T>} list
 	 * @returns {T[]}
-	 * @template T
+	 * @templates T
 	 */
 	function toArray(list) {
 		var array = [];

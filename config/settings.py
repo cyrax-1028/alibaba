@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'commerce.apps.CommerceConfig',
     'import_export',
     'adminsortable2',
+    'phonenumber_field'
 ]
 
 MIDDLEWARE = [

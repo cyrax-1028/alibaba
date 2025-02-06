@@ -9862,7 +9862,7 @@ var totalOrderInit = function totalOrderInit() {
 };
 /* -------------------------------------------------------------------------- */
 
-/*                      Echarts Total Sales E-commerce                        */
+/*                      Echarts Total Sales E-custom                        */
 
 /* -------------------------------------------------------------------------- */
 

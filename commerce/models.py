@@ -43,6 +43,7 @@ class Product(BaseModel):
 
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='media/products/')
     rating = models.PositiveIntegerField(choices=RatingChoice.choices, default=RatingChoice.ONE)
     price = models.DecimalField(max_digits=14, decimal_places=2)
     discount = models.PositiveIntegerField(default=0)
@@ -67,6 +68,10 @@ class Product(BaseModel):
     @property
     def is_new(self):
         return (now() - self.created_at).total_seconds() < 86400
+
+    @property
+    def get_absolute_url(self):
+        return self.image.url
 
     def save(self, *args, **kwargs):
         self.stock = "Available" if (self.quantity or 0) > 0 else "Sold Out"

@@ -1,11 +1,14 @@
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from commerce.models import *
 from typing import Optional
 from commerce.forms import *
+
 
 # //////////////////// P R O D U C T //// C R U D ////////////////////
 def product_list(request):
@@ -41,6 +44,29 @@ def product_details(request, product_id):
         'formatted_date': formatted_date,
     }
     return render(request, 'commerce/Products/product-details.html', context)
+
+def product_grid(request):
+    search_query = request.GET.get('q', '')
+    filter_type = request.GET.get('filter', '')
+
+    if filter_type == 'date':
+        products = Product.objects.all().order_by('-created_at')
+    elif filter_type == 'price':
+        products = Product.objects.all().order_by('-price')
+    elif filter_type == 'rating':
+        products = Product.objects.all().order_by('-rating')
+
+    else:
+        products = Product.objects.all()
+
+    if search_query:
+        products = Product.objects.filter(name__icontains=search_query)
+
+    context = {
+        'products': products,
+    }
+
+    return render(request, 'commerce/Products/product-grid.html', context=context)
 
 def comment_view(request, pk):
     product = get_object_or_404(Product, id=pk)
@@ -184,12 +210,15 @@ def delete_customer(request, pk):
     except Customer.DoesNotExist as e:
         print(e)
 
+
+# //////////////////// O R D E R //// C R U D ////////////////////
 def order_list(request):
     return render(request, template_name='commerce/Orders/order-list.html')
 
 def order_details(request, order_id):
     return render(request, template_name='commerce/Orders/order-details.html')
 
+# //////////////////// V I E W ////////////////////////
 def your_view(request):
     objects = Product.objects.all()
     paginator = Paginator(objects, 5)
@@ -200,3 +229,55 @@ def your_view(request):
 
 def about(request):
     return render(request, 'commerce/about.html')
+
+# //////////////////// A U T H E N T I C A T I O N ////////////////////////
+def register(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password1 = request.POST["password1"]
+        password2 = request.POST["password2"]
+
+        if password1 != password2:
+            messages.error(request, "Parollar mos kelmadi!")
+            return redirect("register")
+
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Bu foydalanuvchi nomi allaqachon mavjud!")
+            return redirect("register")
+
+        user = User.objects.create_user(username=username, password=password1)
+        user.save()
+
+        new_user = authenticate(request, username=username, password=password1)
+        if new_user:
+            login(request, new_user)
+            return redirect("product_list")
+
+        messages.success(request, "Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi!")
+        return redirect("login")
+
+    return render(request, "commerce/authentication/register.html")
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("product_list")
+        else:
+            messages.error(request, "Login yoki parol noto‘g‘ri!")
+            return redirect("login")
+
+    return render(request, "commerce/authentication/login.html")
+
+def user_logout(request):
+    is_admin = request.user.is_staff or request.user.is_superuser
+    logout(request)
+    messages.success(request, "Siz tizimdan chiqdingiz!")
+
+    if is_admin:
+        return redirect("/admin/login/")
+    return redirect("login")

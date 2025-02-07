@@ -1,8 +1,13 @@
 import random
 import string
 import uuid
+from itertools import product
+from django.db.models import Avg
+
 from django.db import models
 from decimal import Decimal
+
+from django.template.defaulttags import comment
 from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
@@ -36,11 +41,9 @@ class Product(BaseModel):
         FOUR = 4
         FIVE = 5
 
-
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    rating = models.PositiveIntegerField(choices=RatingChoice.choices, default=RatingChoice.ONE.value)
-    # image = models.ImageField(upload_to='media/products/', null=True, blank=True)
+    rating = models.PositiveIntegerField(choices=RatingChoice.choices, default=RatingChoice.ONE)
     price = models.DecimalField(max_digits=14, decimal_places=2)
     discount = models.PositiveIntegerField(default=0)
     quantity = models.PositiveIntegerField(default=1, null=True, blank=True)
@@ -48,27 +51,56 @@ class Product(BaseModel):
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     model = models.CharField(max_length=255, null=True, blank=True)
     tags = models.CharField(max_length=255, null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, related_name='products', null=True, blank=True)
+    category = models.ForeignKey("Category", on_delete=models.SET_NULL, related_name="products", null=True, blank=True)
 
     @property
     def discounted_price(self):
         if self.discount > 0:
-            return (self.price * (Decimal(1) - Decimal(self.discount) / 100)).quantize(Decimal('0.01'))
+            return (self.price * (1 - Decimal(self.discount) / 100)).quantize(Decimal("0.01"))
         return self.price
 
+    @property
+    def get_rating(self):
+        avg_rating = self.comments.aggregate(average=Avg("rating"))["average"]
+        return round(avg_rating) if avg_rating is not None else 1
+
+    @property
     def is_new(self):
         return (now() - self.created_at).total_seconds() < 86400
 
     def save(self, *args, **kwargs):
-        self.stock = "Available" if self.quantity > 0 else "Sold Out"
+        self.stock = "Available" if (self.quantity or 0) > 0 else "Sold Out"
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name = 'product'
-        verbose_name_plural = 'products'
+        verbose_name = "product"
+        verbose_name_plural = "products"
+
+
+class Comment(BaseModel):
+    class RatingChoice(models.IntegerChoices):
+        ONE = 1
+        TWO = 2
+        THREE = 3
+        FOUR = 4
+        FIVE = 5
+
+    name = models.CharField(max_length=255, null=True, blank=True)
+    rating = models.PositiveIntegerField(choices=RatingChoice.choices, default=RatingChoice.ONE)
+    email = models.EmailField()
+    content = models.TextField()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="comments", null=True, blank=True)
+    is_negative = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} => {self.created_at}"
+
+    class Meta:
+        ordering = ["-created_at"]
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey("Product", on_delete=models.CASCADE, related_name="images")
@@ -137,22 +169,6 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
 
-class Comment(BaseModel):
-    name = models.CharField(max_length=255, null=True, blank=True)
-    email = models.EmailField()
-    content = models.TextField()
-    product = models.ForeignKey(Product, on_delete=models.CASCADE,
-                                related_name='comments',
-                                null=True, blank=True)
-    is_negative = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f'{self.name} => {self.created_at}'
-
-    class Meta:
-        # verbose_name = 'comment'
-        ordering = ['-created_at']
-
 def generate_random_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 
@@ -186,11 +202,3 @@ class Customer(BaseModel):
 
     def __str__(self):
         return f'{self.full_name} -> {self.generate_invoice_id()}'
-
-
-class Favourite(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favourites')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"{self.user.username} -> {self.product.name}"

@@ -23,10 +23,12 @@
                         </div>
                     </div>
                     <div id="table-customers-replace-element">
+                        {% if user.is_authenticated %}
                         <a href="{% url 'add_customer' %}" class="btn btn-falcon-default btn-sm">
                             <span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span>
                             <span class="d-none d-sm-inline-block ms-1">New</span>
                         </a>
+                        {% endif %}
                         <button class="btn btn-falcon-default btn-sm mx-2" type="button"
                                 onclick="location.href='?filter=filter'">
                             <span class="fas fa-filter" data-fa-transform="shrink-3 down-2"></span>
@@ -89,6 +91,7 @@
                             <td class="joined align-middle py-2">{{ customer.created_date }}</td>
                             <td class="align-middle white-space-nowrap py-2 text-end">
                                 <div class="dropdown font-sans-serif position-static">
+                                    {% if user.is_authenticated %}
                                     <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal"
                                             type="button" id="customer-dropdown-0" data-bs-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">
@@ -113,6 +116,7 @@
                                         return confirm("Siz haqiqatdan ham ushbu foydalanuvchini o‘chirib tashlamoqchimisiz?");
                                     }
                                 </script>
+                                {% endif %}
 
                             </td>
                         </tr>

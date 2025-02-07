@@ -7,8 +7,6 @@ from adminsortable2.admin import SortableAdminMixin
 from import_export import resources
 
 
-admin.site.register(Favourite)
-
 @admin.register(ProductImage)
 class ProductImageAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('image', 'product')

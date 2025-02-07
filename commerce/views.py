@@ -91,7 +91,7 @@ def edit_product(request, pk):
         if form.is_valid():
             product = form.save(commit=False)
             product.save()
-            return redirect('customer_list')
+            return redirect('product_list')
     else:
         form = ProductModelForm(instance=product)
 
@@ -102,6 +102,15 @@ def edit_product(request, pk):
     }
 
     return render(request, 'commerce/Products/edit_product.html', context=context)
+
+@login_required
+def delete_product(request, pk):
+    try:
+        product = Product.objects.get(id=pk)
+        product.delete()
+        return redirect('product_list')
+    except Product.DoesNotExist as e:
+        print(e)
 
 # //////////////////// C U S T O M E R //// C R U D ////////////////////
 def customer_list(request):
@@ -183,7 +192,7 @@ def order_details(request, order_id):
 
 def your_view(request):
     objects = Product.objects.all()
-    paginator = Paginator(objects, 10)
+    paginator = Paginator(objects, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     return render(request, "commerce/Products/product-list.html", {"page_obj": page_obj})
@@ -191,15 +200,3 @@ def your_view(request):
 
 def about(request):
     return render(request, 'commerce/about.html')
-
-
-@login_required
-def add_to_favourites(request, pk):
-    product = get_object_or_404(Product, id=pk)
-    favourite, created = Favourite.objects.get_or_create(user=request.user, product=product)
-
-    if not created:
-        favourite.delete()
-        return redirect('product_list')
-
-    return redirect('product_list')

@@ -6,12 +6,6 @@
     <div class="card mb-3">
         <div class="card-body">
             <div class="row">
-                <div class="col-12 mb-3 text-end">
-                    <a href="{% url 'edit_product' product.id %}" class="btn btn-falcon-default btn-sm">
-                        <span class="fas fa-edit" data-fa-transform="shrink-3 down-2"></span>
-                        <span class="d-none d-sm-inline-block ms-1">Edit</span>
-                    </a>
-                </div>
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="product-slider" id="galleryTop">
                         <div class="swiper-container theme-slider position-lg-absolute all-0"
@@ -35,7 +29,7 @@
                     <h5>{{ product.name }}</h5>
                     <div class="fs--2 mb-3 d-inline-block text-decoration-none">
                         {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= product.rating %}
+                            {% if forloop.counter <= product.get_rating %}
                                 <span class="fa fa-star text-warning"></span>
                             {% else %}
                                 <span class="fa fa-star text-300"></span>
@@ -53,53 +47,19 @@
                     <p class="fs--1 mb-1"><span>Shipping Cost: </span><strong>${{ product.shipping_cost }}</strong></p>
                     <p class="fs--1">Stock: <strong class="text-success">{{ product.stock }}</strong></p>
                     <div class="row">
-                        <div class="col-auto pe-0">
-                            <div class="input-group input-group-sm" data-quantity="data-quantity">
-                                <button class="btn btn-sm btn-outline-secondary border-300" data-field="input-quantity"
-                                        data-type="minus">-
-                                </button>
-                                <input class="form-control text-center input-quantity input-spin-none" type="number"
-                                       min="0" value="0" aria-label="Amount (to the nearest dollar)"
-                                       style="max-width: 50px"/>
-                                <button class="btn btn-sm btn-outline-secondary border-300" data-field="input-quantity"
-                                        data-type="plus">+
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-auto px-2 px-md-3"><a class="btn btn-sm btn-primary" href="#!"><span
-                                class="fas fa-cart-plus me-sm-2"></span><span class="d-none d-sm-inline-block">Add To Cart</span></a>
-                        </div>
-                        <div class="col-auto px-0">
-                            <a id="wish-btn" class="btn btn-sm btn-outline-danger border-300" href="#!"
-                               data-bs-toggle="tooltip" data-bs-placement="top"
-                               title="Add to Wish List" onclick="toggleWishList()">
-                                <span id="heart-icon" class="far fa-heart me-1"></span>
-                                <span id="wish-count">0</span>
+                        {% if user.is_authenticated %}
+                        <div class="col-12 mb-3 text-end">
+                            <a href="{% url 'edit_product' product.id %}" class="btn btn-falcon-default btn-sm">
+                                <span class="fas fa-edit" data-fa-transform="shrink-3 down-2"></span>
+                                <span class="d-none d-sm-inline-block ms-1">Edit</span>
+                            </a>
+                            <a href="{% url 'delete_product' product.id %}" class="btn btn-falcon-danger btn-sm ms-2"
+                               onclick="return confirm('Are you sure you want to delete this product?');">
+                                <span class="fas fa-trash-alt" data-fa-transform="shrink-3 down-2"></span>
+                                <span class="d-none d-sm-inline-block ms-1">Delete</span>
                             </a>
                         </div>
-
-                        <script>
-                            let liked = false;
-                            let wishCount = 0;
-
-                            function toggleWishList() {
-                                liked = !liked;
-                                let heartIcon = document.getElementById("heart-icon");
-                                let wishCountElement = document.getElementById("wish-count");
-
-                                if (liked) {
-                                    heartIcon.classList.remove("far");
-                                    heartIcon.classList.add("fas");
-                                    wishCount++;
-                                } else {
-                                    heartIcon.classList.remove("fas");
-                                    heartIcon.classList.add("far");
-                                    wishCount--;
-                                }
-
-                                wishCountElement.textContent = wishCount;
-                            }
-                        </script>
+                        {% endif %}
 
                     </div>
                 </div>
@@ -144,6 +104,15 @@
                             <div class="tab-pane fade" id="tab-reviews" role="tabpanel" aria-labelledby="reviews-tab">
                                 <div class="row mt-3">
                                     {% for comment in comments %}
+                                        <div class="fs--2 mb-3 d-inline-block text-decoration-none">
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= comment.rating %}
+                                                    <span class="fa fa-star text-warning"></span>
+                                                {% else %}
+                                                    <span class="fa fa-star text-300"></span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
                                         <div class="col-lg-6 mb-4 mb-lg-0">
                                             <div class="mb-1">{% for i in "12345"|make_list %}
                                             {% endfor %}<span
@@ -156,7 +125,16 @@
                                     <div class="col-lg-6 ps-lg-5">
                                         <form method="post" action="{% url 'comment_view' product.id %}">
                                             {% csrf_token %}
-
+                                            <div class="mb-3">
+                                                <label for="id_rating" class="form-label">Rating</label>
+                                                <select class="form-select" id="id_rating" name="rating">
+                                                    <option value="1">⭐ 1 Star</option>
+                                                    <option value="2">⭐⭐ 2 Stars</option>
+                                                    <option value="3">⭐⭐⭐ 3 Stars</option>
+                                                    <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                                                    <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                                                </select>
+                                            </div>
                                             <h5 class="mb-3">Write your Review</h5>
                                             <div class="mb-3">
                                                 <label class="form-label" for="formGroupNameInput">Name:</label>

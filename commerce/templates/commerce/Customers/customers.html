@@ -11,17 +11,6 @@
                     <h5 class="fs-0 mb-0 text-nowrap py-2 py-xl-0">Customers</h5>
                 </div>
                 <div class="col-8 col-sm-auto text-end ps-2">
-                    <div class="d-none" id="table-customers-actions">
-                        <div class="d-flex">
-                            <select class="form-select form-select-sm" aria-label="Bulk actions">
-                                <option selected="">Bulk actions</option>
-                                <option value="Refund">Refund</option>
-                                <option value="Delete">Delete</option>
-                                <option value="Archive">Archive</option>
-                            </select>
-                            <button class="btn btn-falcon-default btn-sm ms-2" type="button">Apply</button>
-                        </div>
-                    </div>
                     <div id="table-customers-replace-element">
                         {% if user.is_authenticated %}
                         <a href="{% url 'add_customer' %}" class="btn btn-falcon-default btn-sm">
@@ -43,12 +32,6 @@
                 <table class="table table-sm table-striped fs--1 mb-0 overflow-hidden">
                     <thead class="bg-200 text-900">
                     <tr>
-                        <th>
-                            <div class="form-check fs-0 mb-0 d-flex align-items-center">
-                                <input class="form-check-input" id="checkbox-bulk-customers-select" type="checkbox"
-                                       data-bulk-select='{"body":"table-customers-body","actions":"table-customers-actions","replacedElement":"table-customers-replace-element"}'/>
-                            </div>
-                        </th>
                         <th class="sort pe-1 align-middle white-space-nowrap" data-sort="name">Name</th>
                         <th class="sort pe-1 align-middle white-space-nowrap" data-sort="email">Email</th>
                         <th class="sort pe-1 align-middle white-space-nowrap" data-sort="phone">Phone</th>
@@ -62,12 +45,6 @@
                     <tbody class="list" id="table-customers-body">
                     {% for customer in customers %}
                         <tr class="btn-reveal-trigger">
-                            <td class="align-middle py-2" style="width: 28px;">
-                                <div class="form-check fs-0 mb-0 d-flex align-items-center">
-                                    <input class="form-check-input" type="checkbox" id="customer-0"
-                                           data-bulk-select-row="data-bulk-select-row"/>
-                                </div>
-                            </td>
                             <td class="name align-middle white-space-nowrap py-2"><a
                                     href="{% url 'customer_details' customer.id %}">
                                 <div class="d-flex d-flex align-items-center">

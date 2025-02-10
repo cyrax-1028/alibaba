@@ -6,7 +6,7 @@
         <div class="card-body">
             <div class="row flex-between-center">
                 <div class="col-sm-auto mb-2 mb-sm-0">
-                    <h6 class="mb-0">Showing 1-24 of 205 Products</h6>
+                    <h6 class="mb-0">Showing Products</h6>
                 </div>
                 <div class="col-sm-auto">
                     <div class="row gx-2 align-items-center">
@@ -28,6 +28,14 @@
                         </div>
                     </div>
                 </div>
+                {% if user.is_authenticated %}
+                    <div class="col-sm-auto">
+                        <a href="{% url 'add_product' %}" class="btn btn-falcon-default btn-sm">
+                            <span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span>
+                            <span class="d-none d-sm-inline-block ms-1">New</span>
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

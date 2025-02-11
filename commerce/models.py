@@ -1,6 +1,7 @@
 import random
 import string
 import uuid
+from email.policy import default
 from itertools import product
 from django.db.models import Avg
 
@@ -11,6 +12,7 @@ from django.template.defaulttags import comment
 from django.utils.timezone import now
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
+
 
 # Create your models here.
 
@@ -115,7 +117,6 @@ class ProductImage(models.Model):
         return f"{self.product.name} - Image {self.id}"
 
 
-
 class Attribute(models.Model):
     name = models.CharField(max_length=255)
 
@@ -131,51 +132,15 @@ class AttributeValue(models.Model):
 
 
 class ProductAttribute(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.SET_NULL,related_name='product_attributes', null=True, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, related_name='product_attributes', null=True,
+                                blank=True)
     attribute = models.ForeignKey(Attribute, on_delete=models.SET_NULL, null=True, blank=True)
     attribute_value = models.ForeignKey(AttributeValue, on_delete=models.SET_NULL, null=True, blank=True)
 
 
-class Order(BaseModel):
-    STATUS_CHOICES = [
-        ('Pending', 'Pending'),
-        ('Completed', 'Completed'),
-        ('Cancelled', 'Cancelled'),
-    ]
-
-    order_id = models.CharField(max_length=20, unique=True)
-    date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
-    billing_address = models.TextField(default="No Billing Address")
-    shipping_address = models.TextField(default="No Shipping Address")
-    email = models.EmailField()
-    phone = models.CharField(max_length=20)
-    payment_method = models.CharField(max_length=50)
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-    def calculate_totals(self):
-        self.subtotal = sum(
-            item.quantity * item.product.discounted_price for item in self.order_items.all()
-        )
-        self.tax = (self.subtotal * Decimal(0.05)).quantize(Decimal('0.01'))
-        self.total = self.subtotal + self.tax
-        self.save()
-
-    def __str__(self):
-        return f"Order #{self.order_id}"
-
-class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-
-    def __str__(self):
-        return f"{self.quantity} x {self.product.name}"
-
 def generate_random_id():
     return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+
 
 def generate_invoice_prefix():
     return ''.join(random.choices(string.ascii_uppercase, k=5))
@@ -207,3 +172,44 @@ class Customer(BaseModel):
 
     def __str__(self):
         return f'{self.full_name} -> {self.generate_invoice_id()}'
+
+
+class Order(BaseModel):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        ('Cancelled', 'Cancelled'),
+    ]
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=5)
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def calculate_totals(self):
+        self.subtotal = sum(
+            item.quantity * item.product.discounted_price for item in self.order_items.all()
+        )
+        self.tax_amount = (self.subtotal * self.tax_rate / Decimal(100)).quantize(Decimal('0.01'))
+        self.total = self.subtotal + self.tax_amount
+        self.save()
+
+    def save(self, *args, **kwargs):
+        if self.customer:
+            self.phone = self.customer.phone_number if self.customer.phone_number else ''
+            self.payment_method = self.customer.vat_number if self.customer.vat_number else ''
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Order #{self.id}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"

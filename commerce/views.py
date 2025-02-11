@@ -213,6 +213,29 @@ def delete_customer(request, pk):
 
 # //////////////////// O R D E R //// C R U D ////////////////////
 def order_list(request):
+    search_query = request.GET.get('q', '')
+    filter_type = request.GET.get('filter', '')
+
+    if filter_type == 'Pending':
+        orders = Order.objects.filter(status='Pending')
+    elif filter_type == 'Completed':
+        orders = Order.objects.filter(status='Completed')
+    elif filter_type == 'Cancelled':
+        orders = Order.objects.filter(status='Cancelled')
+    elif filter_type == 'Clear':
+        orders = Order.objects.filter(status='Clear')
+    else:
+        orders = Order.objects.all().order_by('-created_at')
+
+    for customer in orders:
+        customer.created_date = customer.created_at.strftime("%B %d, %Y")
+
+    if search_query:
+        orders = Customer.objects.filter(full_name__icontains=search_query)
+
+    context = {
+        'orders': orders,
+    }
     return render(request, template_name='commerce/Orders/order-list.html')
 
 def order_details(request, order_id):
@@ -274,10 +297,7 @@ def user_login(request):
     return render(request, "commerce/authentication/login.html")
 
 def user_logout(request):
-    is_admin = request.user.is_staff or request.user.is_superuser
     logout(request)
     messages.success(request, "Siz tizimdan chiqdingiz!")
 
-    if is_admin:
-        return redirect("/admin/login/")
-    return redirect("login")
+    return redirect("product_list")

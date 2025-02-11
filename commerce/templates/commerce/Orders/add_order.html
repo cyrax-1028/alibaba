@@ -1,0 +1,73 @@
+{% extends 'commerce/base/base.html' %}
+
+{% block add_order_content %}
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">🛒 Add New Order</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="customer" class="form-label">👤 Customer</label>
+                    <select id="customer" name="customer" class="form-select" required>
+                        <option value="" disabled selected>-- Select Customer --</option>
+                        {% for customer in customers %}
+                        <option value="{{ customer.id }}">{{ customer.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">📌 Status</label>
+                    <select id="status" name="status" class="form-select">
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="subtotal" class="form-label">💰 Subtotal</label>
+                    <input type="number" id="subtotal" name="subtotal" class="form-control" step="0.01" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tax_rate" class="form-label">🧾 Tax Rate (%)</label>
+                    <input type="number" id="tax_rate" name="tax_rate" class="form-control" step="0.01" value="5" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tax_amount" class="form-label">💵 Tax Amount</label>
+                    <input type="number" id="tax_amount" name="tax_amount" class="form-control" step="0.01" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label for="total" class="form-label">💲 Total</label>
+                    <input type="number" id="total" name="total" class="form-control" step="0.01" readonly>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Order</button>
+                    <a href="{% url 'order_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("subtotal").addEventListener("input", function () {
+        let subtotal = parseFloat(this.value) || 0;
+        let taxRate = parseFloat(document.getElementById("tax_rate").value) || 0;
+        let taxAmount = (subtotal * taxRate / 100).toFixed(2);
+        let total = (subtotal + parseFloat(taxAmount)).toFixed(2);
+
+        document.getElementById("tax_amount").value = taxAmount;
+        document.getElementById("total").value = total;
+    });
+</script>
+
+{% endblock %}

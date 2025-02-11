@@ -188,18 +188,16 @@ class Order(BaseModel):
     tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    def calculate_totals(self):
-        self.subtotal = sum(
-            item.quantity * item.product.discounted_price for item in self.order_items.all()
-        )
-        self.tax_amount = (self.subtotal * self.tax_rate / Decimal(100)).quantize(Decimal('0.01'))
-        self.total = self.subtotal + self.tax_amount
-        self.save()
+
 
     def save(self, *args, **kwargs):
-        if self.customer:
-            self.phone = self.customer.phone_number if self.customer.phone_number else ''
-            self.payment_method = self.customer.vat_number if self.customer.vat_number else ''
+        if self.id:
+            self.subtotal = sum(
+                item.quantity * item.product.discounted_price for item in self.order_items.all()
+            )
+            self.tax_amount = (self.subtotal * self.tax_rate / Decimal(100)).quantize(Decimal('0.01'))
+            self.total = self.subtotal + self.tax_amount
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -210,6 +208,10 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+
+    @property
+    def total_items(self):
+        return self.quantity * self.product.discounted_price
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"

@@ -11,36 +11,36 @@
                         <h5 class="fs-0 mb-0 text-nowrap py-2 py-xl-0">Orders</h5>
                     </div>
                     <div class="col-sm-auto">
-                    <div class="row gx-2 align-items-center">
-                        <div class="col-auto">
-                            <form class="row gx-2">
-                                <div class="col-auto">
-                                    <select class="form-select form-select-sm" aria-label="Bulk actions"
-                                            onchange="location.href=this.value;">
-                                        <option selected disabled>Status</option>
-                                        <option value="?filter=Pending">Pending</option>
-                                        <option value="?filter=Completed">Completed</option>
-                                        <option value="?filter=Cancelled">Cancelled</option>
-                                    </select>
-                                </div>
-                            </form>
+                        <div class="row gx-2 align-items-center">
+                            <div class="col-auto">
+                                <form class="row gx-2">
+                                    <div class="col-auto">
+                                        <select class="form-select form-select-sm" aria-label="Bulk actions"
+                                                onchange="location.href=this.value;">
+                                            <option selected disabled>Status</option>
+                                            <option value="?filter=Pending">Pending</option>
+                                            <option value="?filter=Completed">Completed</option>
+                                            <option value="?filter=Cancelled">Cancelled</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-sm-auto">
+                                <a href="{% url 'order_list' %}" class="btn btn-falcon-default btn-sm">
+                                    <span data-fa-transform="shrink-3 down-2"></span>
+                                    <span class="d-none d-sm-inline-block ms-1">Clear</span>
+                                </a>
+                            </div>
                         </div>
+                    </div>
+                    {% if user.is_authenticated %}
                         <div class="col-sm-auto">
-                        <a href="{% url 'order_list' %}" class="btn btn-falcon-default btn-sm">
-                            <span  data-fa-transform="shrink-3 down-2"></span>
-                            <span class="d-none d-sm-inline-block ms-1">Clear</span>
-                        </a>
-                    </div>
-                    </div>
-                </div>
-                {% if user.is_authenticated %}
-                    <div class="col-sm-auto">
-                        <a href="{% url 'add_product' %}" class="btn btn-falcon-default btn-sm">
-                            <span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span>
-                            <span class="d-none d-sm-inline-block ms-1">New</span>
-                        </a>
-                    </div>
-                {% endif %}
+                            <a href="{% url 'add_order' %}" class="btn btn-falcon-default btn-sm">
+                                <span class="fas fa-plus" data-fa-transform="shrink-3 down-2"></span>
+                                <span class="d-none d-sm-inline-block ms-1">New</span>
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="card-body p-0">
@@ -62,40 +62,64 @@
                         </tr>
                         </thead>
                         <tbody class="list" id="table-orders-body">
-                        <tr class="btn-reveal-trigger">
-                            <td class="order py-2 align-middle white-space-nowrap"><a
-                                    href="../../../app/e-commerce/orders/order-details.html"> <strong>#181</strong></a>
-                                by <strong>Ricky Antony</strong><br/><a href="mailto:ricky@example.com">ricky@example.com</a>
-                            </td>
-                            <td class="date py-2 align-middle">20/04/2019</td>
-                            <td class="address py-2 align-middle white-space-nowrap">Ricky Antony, 2392 Main Avenue,
-                                Penasauka, New Jersey 02149
-                                <p class="mb-0 text-500">Via Flat Rate</p>
-                            </td>
-                            <td class="status py-2 align-middle text-center fs-0 white-space-nowrap"><span
-                                    class="badge badge rounded-pill d-block badge-soft-success">Completed<span
-                                    class="ms-1 fas fa-check" data-fa-transform="shrink-2"></span></span>
-                            </td>
-                            <td class="amount py-2 align-middle text-end fs-0 fw-medium">$99</td>
-                            <td class="py-2 align-middle white-space-nowrap text-end">
-                                <div class="dropdown font-sans-serif position-static">
-                                    <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal"
-                                            type="button" id="order-dropdown-0" data-bs-toggle="dropdown"
-                                            data-boundary="viewport" aria-haspopup="true" aria-expanded="false"><span
-                                            class="fas fa-ellipsis-h fs--1"></span></button>
-                                    <div class="dropdown-menu dropdown-menu-end border py-0"
-                                         aria-labelledby="order-dropdown-0">
-                                        <div class="bg-white py-2"><a class="dropdown-item" href="#!">Completed</a><a
-                                                class="dropdown-item" href="#!">Processing</a><a class="dropdown-item"
-                                                                                                 href="#!">On Hold</a><a
-                                                class="dropdown-item" href="#!">Pending</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item text-danger" href="#!">Delete</a>
+                        {% for order in orders %}
+                            <tr class="btn-reveal-trigger">
+                                <td class="order py-2 align-middle white-space-nowrap"><a
+                                        href="{% url 'order_details' order.id %}"> <strong>#{{ order.id }}</strong></a>
+                                    by <a href="{% url 'order_details' order.id %}"><strong>{{ order.customer.full_name }}</strong></a><br/><a
+                                            href="mailto:{{ order.customer.email }}">{{ order.customer.email }}</a>
+                                </td>
+                                <td class="date py-2 align-middle">{{ order.created_at|date:"d/m/Y" }}</td>
+                                <td class="address py-2 align-middle white-space-nowrap">{{ order.customer.address }}
+                                </td>
+                                <td class="status py-2 align-middle text-center fs-0 white-space-nowrap">
+                                    {% if order.status == "Completed" %}
+                                        <span class="badge badge rounded-pill d-block badge-soft-success">
+            {{ order.status }}
+            <span class="ms-1 fas fa-check" data-fa-transform="shrink-2"></span>
+        </span>
+                                    {% elif order.status == "Pending" %}
+                                        <span class="badge badge rounded-pill d-block badge-soft-warning">
+            {{ order.status }}
+            <span class="ms-1 fas fa-hourglass-half" data-fa-transform="shrink-2"></span>
+        </span>
+                                    {% elif order.status == "Cancelled" %}
+                                        <span class="badge badge rounded-pill d-block badge-soft-danger">
+            {{ order.status }}
+            <span class="ms-1 fas fa-times" data-fa-transform="shrink-2"></span>
+        </span>
+                                    {% else %}
+                                        <span class="badge badge rounded-pill d-block badge-soft-secondary">
+            {{ order.status }}
+        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="amount py-2 align-middle text-end fs-0 fw-medium">${{ order.total }}</td>
+                                <td class="py-2 align-middle white-space-nowrap text-end">
+                                    <div class="dropdown font-sans-serif position-static">
+                                        <button class="btn btn-link text-600 btn-sm dropdown-toggle btn-reveal"
+                                                type="button" data-bs-toggle="dropdown">
+                                            <span class="fas fa-ellipsis-h fs--1"></span>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end border py-0">
+                                            <div class="bg-white py-2">
+                                                <a class="dropdown-item"
+                                                   href="{% url 'change_order_status' order.id 'Completed' %}">Completed</a>
+                                                <a class="dropdown-item"
+                                                   href="{% url 'change_order_status' order.id 'Pending' %}">Pending</a>
+                                                <a class="dropdown-item"
+                                                   href="{% url 'change_order_status' order.id 'Cancelled' %}">Cancelled</a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item text-danger"
+                                                   href="{% url 'delete_order' order.id %}"
+                                                   onclick="return confirm('Haqiqatan ham ushbu buyurtmani o‘chirmoqchimisiz?');">Delete</a>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -110,5 +134,6 @@
                 </div>
             </div>
         </div>
+    </div>
 
 {% endblock %}

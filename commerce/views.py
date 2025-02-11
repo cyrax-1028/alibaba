@@ -227,8 +227,6 @@ def order_list(request):
     else:
         orders = Order.objects.all().order_by('-created_at')
 
-    for customer in orders:
-        customer.created_date = customer.created_at.strftime("%B %d, %Y")
 
     if search_query:
         orders = Customer.objects.filter(full_name__icontains=search_query)
@@ -236,10 +234,56 @@ def order_list(request):
     context = {
         'orders': orders,
     }
-    return render(request, template_name='commerce/Orders/order-list.html')
+    return render(request, template_name='commerce/Orders/order-list.html', context=context)
 
 def order_details(request, order_id):
-    return render(request, template_name='commerce/Orders/order-details.html')
+    order = get_object_or_404(Order, id=order_id)
+
+    context = {
+        'order': order,
+    }
+
+    return render(request, 'commerce/Orders/order-details.html', context)
+
+
+
+def change_order_status(request, order_id, new_status):
+    order = get_object_or_404(Order, id=order_id)
+
+    if new_status in ['Pending', 'Completed', 'Cancelled']:
+        order.status = new_status
+        order.save()
+
+    return redirect('order_list')
+
+def add_order(request):
+    if request.method == "POST":
+        customer_id = request.POST.get("customer")
+        status = request.POST.get("status")
+        subtotal = Decimal(request.POST.get("subtotal", 0))
+        tax_rate = Decimal(request.POST.get("tax_rate", 5))
+        tax_amount = (subtotal * tax_rate / 100).quantize(Decimal("0.01"))
+        total = subtotal + tax_amount
+
+        customer = Customer.objects.get(id=customer_id)
+        Order.objects.create(
+            customer=customer,
+            status=status,
+            subtotal=subtotal,
+            tax_rate=tax_rate,
+            tax_amount=tax_amount,
+            total=total
+        )
+
+        return redirect("order_list")
+
+    customers = Customer.objects.all()
+    return render(request, "commerce/Orders/add_order.html", {"customers": customers})
+
+def delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    order.delete()
+    return redirect('order_list')
 
 # //////////////////// V I E W ////////////////////////
 def your_view(request):

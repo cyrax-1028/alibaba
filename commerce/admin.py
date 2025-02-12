@@ -7,8 +7,13 @@ from adminsortable2.admin import SortableAdminMixin
 from import_export import resources
 
 
-admin.site.register(Order)
-admin.site.register(OrderItem)
+@admin.register(OrderItem)
+class OrderItemAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ('order', 'product', 'quantity')
+
+@admin.register(Order)
+class OrderAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ('customer', 'status')
 
 @admin.register(ProductImage)
 class ProductImageAdmin(ImportExportMixin, admin.ModelAdmin):
@@ -55,7 +60,7 @@ class ProductInline(admin.TabularInline):
     model = Product
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('title', 'created_at', 'product_count')
     search_fields = ('title',)
 

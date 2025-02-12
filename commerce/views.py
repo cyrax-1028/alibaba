@@ -28,8 +28,12 @@ def product_list(request):
     if search_query:
         products = Product.objects.filter(name__icontains=search_query)
 
+    paginator = Paginator(products, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'products': products,
+        'page_obj': page_obj,
     }
     return render(request, 'commerce/Products/product-list.html', context=context)
 
@@ -62,8 +66,12 @@ def product_grid(request):
     if search_query:
         products = Product.objects.filter(name__icontains=search_query)
 
+    paginator = Paginator(products, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'products': products,
+        'page_obj': page_obj,
     }
 
     return render(request, 'commerce/Products/product-grid.html', context=context)

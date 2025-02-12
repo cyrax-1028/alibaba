@@ -11,9 +11,14 @@ from import_export import resources
 class OrderItemAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('order', 'product', 'quantity')
 
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 1
+
 @admin.register(Order)
 class OrderAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ('customer', 'status')
+    inlines = [OrderItemInline]
 
 @admin.register(ProductImage)
 class ProductImageAdmin(ImportExportMixin, admin.ModelAdmin):

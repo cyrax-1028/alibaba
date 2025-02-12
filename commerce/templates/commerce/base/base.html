@@ -94,7 +94,7 @@
                 <a class="navbar-brand" href="{% url 'product_list' %}">
                     <div class="d-flex align-items-center py-3"><img class="me-2"
                                                                      src="{% static 'commerce/assets/img/icons/spot-illustrations/falcon.png' %}"
-                                                                     alt="" width="40"/><span class="font-sans-serif">falcon</span>
+                                                                     alt="" width="40"/><span class="font-sans-serif">Alibaba</span>
                     </div>
                 </a>
             </div>
@@ -280,14 +280,16 @@
                                         </a>
                                             <!-- more inner pages-->
                                         </li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="../../../app/e-commerce/product/product-details.html"
-                                                                aria-expanded="false">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Product details</span>
-                                            </div>
-                                        </a>
-                                            <!-- more inner pages-->
-                                        </li>
+                                        {% if user.is_authenticated %}
+                                            <li class="nav-item"><a class="nav-link"
+                                                                    href="{% url 'add_product' %}"
+                                                                    aria-expanded="false">
+                                                <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Add Product</span>
+                                                </div>
+                                            </a>
+                                                <!-- more inner pages-->
+                                            </li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                                 <li class="nav-item"><a class="nav-link dropdown-indicator" href="#orders"
@@ -307,14 +309,16 @@
                                         </a>
                                             <!-- more inner pages-->
                                         </li>
-                                        <li class="nav-item"><a class="nav-link"
-                                                                href="../../../app/e-commerce/orders/order-details.html"
-                                                                aria-expanded="false">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Order details</span>
-                                            </div>
-                                        </a>
-                                            <!-- more inner pages-->
-                                        </li>
+                                        {% if user.is_authenticated %}
+                                            <li class="nav-item"><a class="nav-link"
+                                                                    href="{% url 'add_order' %}"
+                                                                    aria-expanded="false">
+                                                <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Create Order</span>
+                                                </div>
+                                            </a>
+                                                <!-- more inner pages-->
+                                            </li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                                 <li class="nav-item"><a class="nav-link" href="{% url 'customer_list' %}"
@@ -325,14 +329,16 @@
                                 </a>
                                     <!-- more inner pages-->
                                 </li>
-                                <li class="nav-item"><a class="nav-link"
-                                                        href="../../../app/e-commerce/customer-details.html"
-                                                        aria-expanded="false">
-                                    <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Customer details</span>
-                                    </div>
-                                </a>
-                                    <!-- more inner pages-->
-                                </li>
+                                {% if user.is_authenticated %}
+                                    <li class="nav-item"><a class="nav-link"
+                                                            href="{% url 'add_customer' %}"
+                                                            aria-expanded="false">
+                                        <div class="d-flex align-items-center"><span class="nav-link-text ps-1">Create Customer</span>
+                                        </div>
+                                    </a>
+                                        <!-- more inner pages-->
+                                    </li>
+                                {% endif %}
                                 <li class="nav-item"><a class="nav-link"
                                                         href="../../../app/e-commerce/shopping-cart.html"
                                                         aria-expanded="false">
@@ -2259,6 +2265,12 @@
             {% endblock %}
 
             {% block product_detail_content %}
+            {% endblock %}
+
+            {% block order_product_content %}
+            {% endblock %}
+
+            {% block order_summary_content %}
             {% endblock %}
 
             {% block order_list_content %}

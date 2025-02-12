@@ -1,0 +1,35 @@
+{% extends 'commerce/base/base.html' %}
+{% load static %}
+
+{% block order_product_content %}
+<div class="container mt-4">
+    <h2>Buyurtma berish</h2>
+    <div class="card">
+        <div class="card-body">
+            <h4>{{ product.name }}</h4>
+            <p><strong>Narx:</strong> ${{ product.discounted_price }}</p>
+            <p><strong>Omborda:</strong> {{ product.stock }} ta</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Customer tanlash dropdown -->
+                <label for="customer">Mijozni tanlang:</label>
+                <select name="customer" id="customer" class="form-control mb-3" required>
+                    <option value="" disabled selected>Tanlang...</option>
+                    {% for customer in customers %}
+                        <option value="{{ customer.id }}">{{ customer.full_name }} ({{ customer.email }})</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Miqdorni tanlash -->
+                <label for="quantity">Miqdor:</label>
+                <input type="number" name="quantity" id="quantity" min="1" max="{{ product.stock }}" value="1" class="form-control mb-3" required>
+
+                <button type="submit" class="btn btn-success">Buyurtma berish</button>
+                <a href="{% url 'product_list' %}" class="btn btn-secondary">Ortga</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

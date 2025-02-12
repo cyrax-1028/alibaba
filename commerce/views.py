@@ -28,7 +28,7 @@ def product_list(request):
     if search_query:
         products = Product.objects.filter(name__icontains=search_query)
 
-    paginator = Paginator(products, 5)
+    paginator = Paginator(products, 6)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -66,7 +66,7 @@ def product_grid(request):
     if search_query:
         products = Product.objects.filter(name__icontains=search_query)
 
-    paginator = Paginator(products, 5)
+    paginator = Paginator(products, 6)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -145,7 +145,6 @@ def delete_product(request, pk):
         return redirect('product_list')
     except Product.DoesNotExist as e:
         print(e)
-
 # //////////////////// C U S T O M E R //// C R U D ////////////////////
 def customer_list(request):
     search_query = request.GET.get('q', '')
@@ -264,29 +263,55 @@ def change_order_status(request, order_id, new_status):
 
     return redirect('order_list')
 
+
+@login_required
 def add_order(request):
+    customers = Customer.objects.all()
+    products = Product.objects.all()
+
     if request.method == "POST":
         customer_id = request.POST.get("customer")
-        status = request.POST.get("status")
-        subtotal = Decimal(request.POST.get("subtotal", 0))
-        tax_rate = Decimal(request.POST.get("tax_rate", 5))
-        tax_amount = (subtotal * tax_rate / 100).quantize(Decimal("0.01"))
-        total = subtotal + tax_amount
+        product_id = request.POST.get("product")
+        quantity = int(request.POST.get("quantity", 1))
+        status = request.POST.get("status", "Pending")
 
-        customer = Customer.objects.get(id=customer_id)
-        Order.objects.create(
-            customer=customer,
-            status=status,
-            subtotal=subtotal,
-            tax_rate=tax_rate,
-            tax_amount=tax_amount,
-            total=total
-        )
+        customer = get_object_or_404(Customer, id=customer_id)
+        product = get_object_or_404(Product, id=product_id)
+
+        order, created = Order.objects.get_or_create(customer=customer, status=status)
+
+        OrderItem.objects.create(order=order, product=product, quantity=quantity)
 
         return redirect("order_list")
 
+    return render(request, "commerce/Orders/add_order.html", {"customers": customers, "products": products})
+
+@login_required
+def order_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
     customers = Customer.objects.all()
-    return render(request, "commerce/Orders/add_order.html", {"customers": customers})
+
+    if request.method == "POST":
+        customer_id = request.POST.get("customer")
+        quantity = int(request.POST.get("quantity", 1))
+
+        customer = get_object_or_404(Customer, id=customer_id)
+
+        order, created = Order.objects.get_or_create(customer=customer, status="Pending")
+
+        OrderItem.objects.create(order=order, product=product, quantity=quantity)
+
+        return redirect('order_summary')
+
+    context = {
+        'product': product,
+        'customers': customers,
+    }
+
+    return render(request, "commerce/Products/order_product.html", context=context)
+
+def order_summary(request):
+    return render(request, "commerce/Products/order_summary.html")
 
 def delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -331,7 +356,7 @@ def register(request):
         messages.success(request, "Ro‘yxatdan o‘tish muvaffaqiyatli yakunlandi!")
         return redirect("login")
 
-    return render(request, "commerce/authentication/register.html")
+    return render(request, "commerce/Authentication/register.html")
 
 def user_login(request):
     if request.method == "POST":
@@ -346,7 +371,7 @@ def user_login(request):
             messages.error(request, "Login yoki parol noto‘g‘ri!")
             return redirect("login")
 
-    return render(request, "commerce/authentication/login.html")
+    return render(request, "commerce/Authentication/login.html")
 
 def user_logout(request):
     logout(request)

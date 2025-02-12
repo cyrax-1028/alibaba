@@ -10,6 +10,7 @@
             <form method="POST">
                 {% csrf_token %}
 
+                <!-- Customer tanlash -->
                 <div class="mb-3">
                     <label for="customer" class="form-label">👤 Customer</label>
                     <select id="customer" name="customer" class="form-select" required>
@@ -20,6 +21,24 @@
                     </select>
                 </div>
 
+                <!-- Mahsulot tanlash -->
+                <div class="mb-3">
+                    <label for="product" class="form-label">📦 Product</label>
+                    <select id="product" name="product" class="form-select" required>
+                        <option value="" disabled selected>-- Select Product --</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}">{{ product.name }} (${{ product.discounted_price }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Miqdor -->
+                <div class="mb-3">
+                    <label for="quantity" class="form-label">🔢 Quantity</label>
+                    <input type="number" id="quantity" name="quantity" class="form-control" min="1" value="1" required>
+                </div>
+
+                <!-- Status -->
                 <div class="mb-3">
                     <label for="status" class="form-label">📌 Status</label>
                     <select id="status" name="status" class="form-select">
@@ -29,26 +48,7 @@
                     </select>
                 </div>
 
-                <div class="mb-3">
-                    <label for="subtotal" class="form-label">💰 Subtotal</label>
-                    <input type="number" id="subtotal" name="subtotal" class="form-control" step="0.01" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="tax_rate" class="form-label">🧾 Tax Rate (%)</label>
-                    <input type="number" id="tax_rate" name="tax_rate" class="form-control" step="0.01" value="5" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="tax_amount" class="form-label">💵 Tax Amount</label>
-                    <input type="number" id="tax_amount" name="tax_amount" class="form-control" step="0.01" readonly>
-                </div>
-
-                <div class="mb-3">
-                    <label for="total" class="form-label">💲 Total</label>
-                    <input type="number" id="total" name="total" class="form-control" step="0.01" readonly>
-                </div>
-
+                <!-- Tugmalar -->
                 <div class="text-end">
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save Order</button>
                     <a href="{% url 'order_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Cancel</a>
@@ -57,17 +57,4 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.getElementById("subtotal").addEventListener("input", function () {
-        let subtotal = parseFloat(this.value) || 0;
-        let taxRate = parseFloat(document.getElementById("tax_rate").value) || 0;
-        let taxAmount = (subtotal * taxRate / 100).toFixed(2);
-        let total = (subtotal + parseFloat(taxAmount)).toFixed(2);
-
-        document.getElementById("tax_amount").value = taxAmount;
-        document.getElementById("total").value = total;
-    });
-</script>
-
 {% endblock %}

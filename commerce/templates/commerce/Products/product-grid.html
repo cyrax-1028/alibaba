@@ -91,11 +91,20 @@
                                     {% endfor %}
                                 </div>
                                 {% if user.is_authenticated %}
-                                    <div><a class="btn btn-sm btn-falcon-default"
-                                            href="{% url 'edit_product' product.id %}" data-bs-toggle="tooltip"
-                                            data-bs-placement="top"
-                                            title="Edit"><span
-                                            class="fas fa-edit"></span></a></div>
+                                    <div>
+                                        <a class="btn btn-sm btn-falcon-default"
+                                           href="{% url 'edit_product' product.id %}"
+                                           data-bs-toggle="tooltip"
+                                           data-bs-placement="top"
+                                           title="Edit">
+                                            <span class="fas fa-edit"></span>
+                                        </a>
+                                        <a href="{% url 'order_product' product.id %}"
+                                           class="btn btn-primary btn-sm ms-2">
+                                            <span class="fas fa-shopping-cart"></span>
+                                        </a>
+                                    </div>
+
                                 {% endif %}
                             </div>
                         </div>
@@ -104,40 +113,41 @@
             </div>
         </div>
         <div class="card-footer d-flex align-items-center justify-content-center">
-    {% if page_obj.has_previous %}
-        <a class="btn btn-sm btn-falcon-default me-2" href="?page={{ page_obj.previous_page_number }}" title="Previous">
-            <span class="fas fa-chevron-left"></span>
-        </a>
-    {% else %}
-        <button class="btn btn-sm btn-falcon-default me-2 disabled" title="Previous">
-            <span class="fas fa-chevron-left"></span>
-        </button>
-    {% endif %}
-
-    <ul class="pagination mb-0">
-        {% for num in page_obj.paginator.page_range %}
-            {% if num == page_obj.number %}
-                <li class="page-item active">
-                    <span class="page-link">{{ num }}</span>
-                </li>
-            {% elif num > page_obj.number|add:"-2" and num < page_obj.number|add:"2" %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                </li>
+            {% if page_obj.has_previous %}
+                <a class="btn btn-sm btn-falcon-default me-2" href="?page={{ page_obj.previous_page_number }}"
+                   title="Previous">
+                    <span class="fas fa-chevron-left"></span>
+                </a>
+            {% else %}
+                <button class="btn btn-sm btn-falcon-default me-2 disabled" title="Previous">
+                    <span class="fas fa-chevron-left"></span>
+                </button>
             {% endif %}
-        {% endfor %}
-    </ul>
 
-    {% if page_obj.has_next %}
-        <a class="btn btn-sm btn-falcon-default ms-2" href="?page={{ page_obj.next_page_number }}" title="Next">
-            <span class="fas fa-chevron-right"></span>
-        </a>
-    {% else %}
-        <button class="btn btn-sm btn-falcon-default ms-2 disabled" title="Next">
-            <span class="fas fa-chevron-right"></span>
-        </button>
-    {% endif %}
-</div>
+            <ul class="pagination mb-0">
+                {% for num in page_obj.paginator.page_range %}
+                    {% if num == page_obj.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:"-2" and num < page_obj.number|add:"2" %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+
+            {% if page_obj.has_next %}
+                <a class="btn btn-sm btn-falcon-default ms-2" href="?page={{ page_obj.next_page_number }}" title="Next">
+                    <span class="fas fa-chevron-right"></span>
+                </a>
+            {% else %}
+                <button class="btn btn-sm btn-falcon-default ms-2 disabled" title="Next">
+                    <span class="fas fa-chevron-right"></span>
+                </button>
+            {% endif %}
+        </div>
     </div>
 
 {% endblock %}

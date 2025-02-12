@@ -148,12 +148,7 @@ def delete_product(request, pk):
 # //////////////////// C U S T O M E R //// C R U D ////////////////////
 def customer_list(request):
     search_query = request.GET.get('q', '')
-    filter_type = request.GET.get('filter', '')
-
-    if filter_type == 'filter':
-        customers = Customer.objects.all().order_by('full_name')
-    else:
-        customers = Customer.objects.all().order_by('-created_at')
+    customers = Customer.objects.all()
 
     for customer in customers:
         customer.created_date = customer.created_at.strftime("%B %d, %Y")

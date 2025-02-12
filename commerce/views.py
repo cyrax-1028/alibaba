@@ -236,7 +236,7 @@ def order_list(request):
 
 
     if search_query:
-        orders = Customer.objects.filter(full_name__icontains=search_query)
+        orders = Order.objects.filter(customer__full_name__icontains=search_query)
 
     context = {
         'orders': orders,
@@ -318,15 +318,7 @@ def delete_order(request, order_id):
     order.delete()
     return redirect('order_list')
 
-# //////////////////// V I E W ////////////////////////
-def your_view(request):
-    objects = Product.objects.all()
-    paginator = Paginator(objects, 5)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    return render(request, "commerce/Products/product-list.html", {"page_obj": page_obj})
-
-
+# //////////////////// A B O U T ////////////////////////
 def about(request):
     return render(request, 'commerce/about.html')
 

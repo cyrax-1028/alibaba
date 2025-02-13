@@ -42,7 +42,7 @@
                     {% endif %}
                     ${{ product.discounted_price }}
                     {% if product.discount > 0 %}
-                        -{{ product.discount }}
+                        -{{ product.discount }}%
                     {% endif %}
                     <p class="fs--1 mb-1"><span>Shipping Cost: </span><strong>${{ product.shipping_cost }}</strong></p>
                     <p class="fs--1">Stock: <strong class="text-success">{{ product.stock }}</strong></p>

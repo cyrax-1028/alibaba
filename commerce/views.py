@@ -37,6 +37,7 @@ def product_list(request):
     }
     return render(request, 'commerce/Products/product-list.html', context=context)
 
+
 def product_details(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     comments = Comment.objects.filter(product=product, is_negative=False)
@@ -48,6 +49,7 @@ def product_details(request, product_id):
         'formatted_date': formatted_date,
     }
     return render(request, 'commerce/Products/product-details.html', context)
+
 
 def product_grid(request):
     search_query = request.GET.get('q', '')
@@ -76,6 +78,7 @@ def product_grid(request):
 
     return render(request, 'commerce/Products/product-grid.html', context=context)
 
+
 def comment_view(request, pk):
     product = get_object_or_404(Product, id=pk)
     form = CommentModelForm()
@@ -97,6 +100,7 @@ def comment_view(request, pk):
     }
     return render(request, 'commerce/Products/product-details.html', context=context)
 
+
 @login_required
 def add_product(request):
     if request.method == 'POST':
@@ -115,6 +119,7 @@ def add_product(request):
     }
 
     return render(request, 'commerce/Products/add_product.html', context=context)
+
 
 @login_required
 def edit_product(request, pk):
@@ -137,6 +142,7 @@ def edit_product(request, pk):
 
     return render(request, 'commerce/Products/edit_product.html', context=context)
 
+
 @login_required
 def delete_product(request, pk):
     try:
@@ -145,6 +151,8 @@ def delete_product(request, pk):
         return redirect('product_list')
     except Product.DoesNotExist as e:
         print(e)
+
+
 # //////////////////// C U S T O M E R //// C R U D ////////////////////
 def customer_list(request):
     search_query = request.GET.get('q', '')
@@ -162,6 +170,7 @@ def customer_list(request):
 
     return render(request, template_name='commerce/customers/customers.html', context=context)
 
+
 def customer_details(request, pk):
     customer = get_object_or_404(Customer, id=pk)
     created_date = customer.created_at.strftime("%b %d, %I:%M %p")
@@ -172,6 +181,7 @@ def customer_details(request, pk):
     }
 
     return render(request, template_name='commerce/customers/customer-details.html', context=context)
+
 
 @login_required
 def add_customer(request):
@@ -188,6 +198,7 @@ def add_customer(request):
 
     return render(request, 'commerce/Customers/add_customer.html', {'form': form})
 
+
 @login_required
 def edit_customer(request, pk):
     customer = get_object_or_404(Customer, id=pk)
@@ -202,6 +213,7 @@ def edit_customer(request, pk):
         form = CustomerModelForm(instance=customer)
 
     return render(request, 'commerce/Customers/edit_customer.html', {'form': form})
+
 
 @login_required
 def delete_customer(request, pk):
@@ -229,7 +241,6 @@ def order_list(request):
     else:
         orders = Order.objects.all().order_by('-created_at')
 
-
     if search_query:
         orders = Order.objects.filter(customer__full_name__icontains=search_query)
 
@@ -237,6 +248,7 @@ def order_list(request):
         'orders': orders,
     }
     return render(request, template_name='commerce/Orders/order-list.html', context=context)
+
 
 def order_details(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -246,7 +258,6 @@ def order_details(request, order_id):
     }
 
     return render(request, 'commerce/Orders/order-details.html', context)
-
 
 
 def change_order_status(request, order_id, new_status):
@@ -281,6 +292,7 @@ def add_order(request):
 
     return render(request, "commerce/Orders/add_order.html", {"customers": customers, "products": products})
 
+
 @login_required
 def order_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -292,9 +304,16 @@ def order_product(request, product_id):
 
         customer = get_object_or_404(Customer, id=customer_id)
 
+        if product.quantity < quantity:
+            messages.error(request, "Yetarli mahsulot yo'q!")
+            return redirect('order_product', product_id=product_id)
+
         order, created = Order.objects.get_or_create(customer=customer, status="Pending")
 
         OrderItem.objects.create(order=order, product=product, quantity=quantity)
+
+        product.quantity -= quantity
+        product.save()
 
         return redirect('order_summary')
 
@@ -305,17 +324,21 @@ def order_product(request, product_id):
 
     return render(request, "commerce/Products/order_product.html", context=context)
 
+
 def order_summary(request):
     return render(request, "commerce/Products/order_summary.html")
+
 
 def delete_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     order.delete()
     return redirect('order_list')
 
+
 # //////////////////// A B O U T ////////////////////////
 def about(request):
     return render(request, 'commerce/about.html')
+
 
 # //////////////////// A U T H E N T I C A T I O N ////////////////////////
 def register(request):
@@ -345,6 +368,7 @@ def register(request):
 
     return render(request, "commerce/Authentication/register.html")
 
+
 def user_login(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -359,6 +383,7 @@ def user_login(request):
             return redirect("login")
 
     return render(request, "commerce/Authentication/login.html")
+
 
 def user_logout(request):
     logout(request)

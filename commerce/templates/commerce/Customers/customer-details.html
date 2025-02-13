@@ -9,8 +9,10 @@
                 <div class="col">
                     <h5 class="mb-2">{{ customer.full_name }} (<a
                             href="mailto:{{ customer.email }}">{{ customer.email }}</a>)</h5><a
-                        class="btn btn-falcon-default btn-sm" href="#!"><span class="fas fa-plus fs--2 me-1"></span>Add
-                    note</a>
+                        class="btn btn-falcon-default btn-sm" href="{% url 'customer_info' customer.id %}">
+                    <span class="fas fa-eye fs--2 me-1"></span> View Info
+                </a>
+
                     <button class="btn btn-falcon-default btn-sm dropdown-toggle ms-2 dropdown-caret-none" type="button"
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span
                             class="fas fa-ellipsis-h"></span></button>

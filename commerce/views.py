@@ -224,6 +224,10 @@ def delete_customer(request, pk):
     except Customer.DoesNotExist as e:
         print(e)
 
+def customer_info(request, pk):
+    customer = get_object_or_404(Customer, id=pk)
+
+    return render(request, "commerce/Customers/customer_info.html", {"customer": customer})
 
 # //////////////////// O R D E R //// C R U D ////////////////////
 def order_list(request):

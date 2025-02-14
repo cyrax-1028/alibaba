@@ -1,7 +1,9 @@
 .rating-input {
     display: flex;
     flex-direction: row-reverse;
-    justify-content: flex-start;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
 }
 
 .rating-input input {
@@ -9,11 +11,11 @@
 }
 
 .rating-input label {
-    font-size: 40px;
+    font-size: 45px;
     color: #e4e5e9;
     cursor: pointer;
     transition: color 0.2s ease-in-out;
-    padding: 5px;
+    padding: 10px;
 }
 
 

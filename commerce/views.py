@@ -313,7 +313,6 @@ def order_product(request, product_id):
             return redirect('order_product', product_id=product_id)
 
         order, created = Order.objects.get_or_create(customer=customer, status="Pending")
-
         OrderItem.objects.create(order=order, product=product, quantity=quantity)
 
         product.quantity -= quantity
@@ -343,6 +342,8 @@ def delete_order(request, order_id):
 def about(request):
     return render(request, 'commerce/about.html')
 
+def about_alibaba(request):
+    return render(request, 'commerce/about_alibaba.html')
 
 # //////////////////// A U T H E N T I C A T I O N ////////////////////////
 def register(request):

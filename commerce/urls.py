@@ -17,6 +17,7 @@ urlpatterns = [
     path('edit_customer/<int:pk>/', views.edit_customer, name='edit_customer'),
     path('delete_customer/<int:pk>/', views.delete_customer, name='delete_customer'),
     path('about/', views.about, name='about'),
+    path('about_alibaba/', views.about_alibaba, name='about_alibaba'),
     path('order_list/', views.order_list, name='order_list'),
     path('order_detail/<int:order_id>/', views.order_details, name='order_details'),
     path('order/<int:order_id>/change-status/<str:new_status>/', views.change_order_status, name='change_order_status'),

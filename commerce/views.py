@@ -1,3 +1,5 @@
+from lib2to3.fixes.fix_input import context
+
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -5,6 +7,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+
 from commerce.models import *
 from typing import Optional
 from commerce.forms import *
@@ -23,7 +28,7 @@ def product_list(request):
         products = Product.objects.all().order_by('-rating')
 
     else:
-        products = Product.objects.all()
+        products = Product.objects.all().order_by('-created_at')
 
     if search_query:
         products = Product.objects.filter(name__icontains=search_query)
@@ -119,6 +124,17 @@ def add_product(request):
     }
 
     return render(request, 'commerce/Products/add_product.html', context=context)
+
+# class CreateProduct(CreateView):
+#     model = Product
+#     template_name = 'commerce/Products/add_product.html'
+#     form_class = ProductModelForm
+#     success_url = reverse_lazy('product_list')
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context["categories"] = Category.objects.all()
+#         return context
 
 
 @login_required
@@ -224,10 +240,12 @@ def delete_customer(request, pk):
     except Customer.DoesNotExist as e:
         print(e)
 
+
 def customer_info(request, pk):
     customer = get_object_or_404(Customer, id=pk)
 
     return render(request, "commerce/Customers/customer_info.html", {"customer": customer})
+
 
 # //////////////////// O R D E R //// C R U D ////////////////////
 def order_list(request):
@@ -342,8 +360,10 @@ def delete_order(request, order_id):
 def about(request):
     return render(request, 'commerce/about.html')
 
+
 def about_alibaba(request):
     return render(request, 'commerce/about_alibaba.html')
+
 
 # //////////////////// A U T H E N T I C A T I O N ////////////////////////
 def register(request):

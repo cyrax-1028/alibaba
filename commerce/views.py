@@ -1,5 +1,5 @@
 from lib2to3.fixes.fix_input import context
-
+from django.conf import settings
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -9,7 +9,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-
+from django.core.mail import send_mail
 from commerce.models import *
 from typing import Optional
 from commerce.forms import *
@@ -369,6 +369,7 @@ def about_alibaba(request):
 def register(request):
     if request.method == "POST":
         username = request.POST["username"]
+        email = request.POST["email"]
         password1 = request.POST["password1"]
         password2 = request.POST["password2"]
 
@@ -380,8 +381,20 @@ def register(request):
             messages.error(request, "Bu foydalanuvchi nomi allaqachon mavjud!")
             return redirect("register")
 
-        user = User.objects.create_user(username=username, password=password1)
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Bu email allaqachon ro‘yxatdan o‘tgan!")
+            return redirect("register")
+
+        user = User.objects.create_user(username=username, email=email, password=password1)
         user.save()
+
+        send_mail(
+            "Ro‘yxatdan o‘tish muvaffaqiyatli!",
+            f"Hurmatli {username}, siz Alibaba.com onlayn do'konidan muvaffaqiyatli ro‘yxatdan o‘tdingiz!",
+            settings.EMAIL_HOST_USER,
+            [email],
+            fail_silently=False,
+        )
 
         new_user = authenticate(request, username=username, password=password1)
         if new_user:
@@ -402,6 +415,13 @@ def user_login(request):
 
         if user is not None:
             login(request, user)
+            send_mail(
+                "Kirish muvaffaqiyatli!",
+                f"Hurmatli {username}, siz Alibaba.com tizimiga muvaffaqiyatli kirdingiz!",
+                settings.EMAIL_HOST_USER,
+                [user.email],
+                fail_silently=False,
+            )
             return redirect("product_list")
         else:
             messages.error(request, "Login yoki parol noto‘g‘ri!")
@@ -409,9 +429,14 @@ def user_login(request):
 
     return render(request, "commerce/Authentication/login.html")
 
-
 def user_logout(request):
+    if request.user.is_authenticated:
+        send_mail(
+            "Chiqish amalga oshirildi!",
+            f"Hurmatli {request.user.username}, siz Alibaba.com tizimidan chiqdingiz!",
+            settings.EMAIL_HOST_USER,
+            [request.user.email],
+            fail_silently=False,
+        )
     logout(request)
-    messages.success(request, "Siz tizimdan chiqdingiz!")
-
     return redirect("product_list")
